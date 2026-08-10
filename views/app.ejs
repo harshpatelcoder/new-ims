@@ -595,10 +595,10 @@
               <div class="d-flex align-items-center justify-content-between">
                 <div>
                   <small class="text-secondary fw-semibold">Total Inventory Value</small>
-                  <h3 class="fw-bold mb-0 mt-1">$<%= dashboardData.totalInventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></h3>
+                  <h3 class="fw-bold mb-0 mt-1">₹<%= dashboardData.totalInventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></h3>
                 </div>
                 <div class="metric-card-icon bg-warning-subtle text-warning">
-                  <i class="fa-solid fa-sack-dollar"></i>
+                  <i class="fa-solid fa-indian-rupee-sign"></i>
                 </div>
               </div>
               <div class="mt-2 text-muted extra-small">
@@ -681,10 +681,10 @@
               <div class="d-flex align-items-center justify-content-between">
                 <div>
                   <small class="text-secondary fw-semibold">Inventory Valuation</small>
-                  <h3 class="fw-bold mb-0 mt-1">$<%= dashboardData.inventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></h3>
+                  <h3 class="fw-bold mb-0 mt-1">₹<%= dashboardData.inventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></h3>
                 </div>
                 <div class="metric-card-icon bg-success-subtle text-success">
-                  <i class="fa-solid fa-dollar-sign"></i>
+                  <i class="fa-solid fa-indian-rupee-sign"></i>
                 </div>
               </div>
               <div class="mt-2 text-muted extra-small">
@@ -1165,8 +1165,8 @@
                       <small class="extra-small text-muted">Min: <%= p.minimum_stock %></small>
                     </td>
                     <td class="small">
-                      <div>Selling: <strong class="text-success">$<%= p.selling_price.toFixed(2) %></strong></div>
-                      <div class="text-muted extra-small">Cost: $<%= p.purchase_price.toFixed(2) %></div>
+                      <div>Selling: <strong class="text-success">₹<%= p.selling_price.toFixed(2) %></strong></div>
+                      <div class="text-muted extra-small">Cost: ₹<%= p.purchase_price.toFixed(2) %></div>
                     </td>
                     <td class="small text-secondary">
                       <%= p.supplier_id ? p.supplier_id.name : 'N/A' %>
@@ -1539,19 +1539,19 @@
         <div class="col-12 col-md-4">
           <div class="card-custom p-4 text-center">
             <small class="text-secondary fw-semibold">Total Inventory Value</small>
-            <h3 class="fw-bold text-success mt-2">$<%= reportData.totalInventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2}) %></h3>
+            <h3 class="fw-bold text-success mt-2">₹<%= reportData.totalInventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2}) %></h3>
           </div>
         </div>
         <div class="col-12 col-md-4">
           <div class="card-custom p-4 text-center">
             <small class="text-secondary fw-semibold">Total Cost Value</small>
-            <h3 class="fw-bold text-primary mt-2">$<%= reportData.totalInventoryCost.toLocaleString(undefined, {minimumFractionDigits: 2}) %></h3>
+            <h3 class="fw-bold text-primary mt-2">₹<%= reportData.totalInventoryCost.toLocaleString(undefined, {minimumFractionDigits: 2}) %></h3>
           </div>
         </div>
         <div class="col-12 col-md-4">
           <div class="card-custom p-4 text-center">
             <small class="text-secondary fw-semibold">Estimated Gross Margin</small>
-            <h3 class="fw-bold text-info mt-2">$<%= reportData.estimatedMargin.toLocaleString(undefined, {minimumFractionDigits: 2}) %></h3>
+            <h3 class="fw-bold text-info mt-2">₹<%= reportData.estimatedMargin.toLocaleString(undefined, {minimumFractionDigits: 2}) %></h3>
           </div>
         </div>
 
@@ -1575,8 +1575,8 @@
                       <td class="fw-semibold text-dark"><%= p.name %> (<%= p.brand %>)</td>
                       <td class="small"><%= p.supplier_id ? p.supplier_id.name : 'N/A' %></td>
                       <td><%= p.stock %> <%= p.unit %></td>
-                      <td>$<%= p.selling_price.toFixed(2) %></td>
-                      <td class="fw-bold text-success">$<%= (p.stock * p.selling_price).toFixed(2) %></td>
+                      <td>₹<%= p.selling_price.toFixed(2) %></td>
+                      <td class="fw-bold text-success">₹<%= (p.stock * p.selling_price).toFixed(2) %></td>
                     </tr>
                   <% }) %>
                 </tbody>
@@ -1714,11 +1714,11 @@
             <input type="text" class="form-control" name="size" placeholder="e.g. 1L, 4L, 20L">
           </div>
           <div class="col-6 col-md-3">
-            <label class="form-label small fw-semibold text-secondary">Purchase Price ($)</label>
+            <label class="form-label small fw-semibold text-secondary">Purchase Price (₹)</label>
             <input type="number" step="0.01" class="form-control" name="purchase_price" placeholder="0.00">
           </div>
           <div class="col-6 col-md-3">
-            <label class="form-label small fw-semibold text-secondary">Selling Price ($)</label>
+            <label class="form-label small fw-semibold text-secondary">Selling Price (₹)</label>
             <input type="number" step="0.01" class="form-control" name="selling_price" placeholder="0.00">
           </div>
           <div class="col-6 col-md-3">
@@ -1790,11 +1790,11 @@
             <input type="text" class="form-control" id="edit_size" name="size">
           </div>
           <div class="col-6 col-md-3">
-            <label class="form-label small fw-semibold text-secondary">Purchase Price ($)</label>
+            <label class="form-label small fw-semibold text-secondary">Purchase Price (₹)</label>
             <input type="number" step="0.01" class="form-control" id="edit_purchase_price" name="purchase_price">
           </div>
           <div class="col-6 col-md-3">
-            <label class="form-label small fw-semibold text-secondary">Selling Price ($)</label>
+            <label class="form-label small fw-semibold text-secondary">Selling Price (₹)</label>
             <input type="number" step="0.01" class="form-control" id="edit_selling_price" name="selling_price">
           </div>
           <div class="col-6 col-md-3">
