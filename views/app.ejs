@@ -1,1 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paint IMS V2 - Paint Shop Inventory Management</title>
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5.3 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6.4 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --sidebar-width: 260px;
+      --primary: #0EA5E9;
+      --primary-hover: #0284C7;
+      --primary-light: #E0F2FE;
+      --dark: #0F172A;
+      --secondary: #64748B;
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --border: #E2E8F0;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+    }
 
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--dark);
+      overflow-x: hidden;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* Sidebar Styling */
+    .app-sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #FFFFFF;
+      border-right: 1px solid #E2E8F0;
+      z-index: 1040;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 1px 0 10px rgba(15, 23, 42, 0.02);
+    }
+
+    .sidebar-brand {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #F1F5F9;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: linear-gradient(135deg, #38BDF8, #0EA5E9, #0284C7);
+      color: white;
+      border-radius: 0.625rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+    }
+
+    .nav-link-custom {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.9rem;
+      margin: 0.2rem 0.75rem;
+      color: #64748B;
+      font-weight: 500;
+      font-size: 0.88rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-link-custom:hover {
+      color: #0EA5E9;
+      background-color: #F8FAFC;
+      transform: translateX(2px);
+    }
+
+    .nav-link-custom.active {
+      color: #0284C7;
+      background: linear-gradient(90deg, #E0F2FE 0%, #F0F9FF 100%);
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(14, 165, 233, 0.05);
+    }
+
+    .nav-link-custom.active::before {
+      content: '';
+      position: absolute;
+      left: -0.75rem;
+      top: 20%;
+      bottom: 20%;
+      width: 3.5px;
+      background-color: #0EA5E9;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Main Content Wrapper */
+    .app-main {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 991.98px) {
+      .app-sidebar {
+        transform: translateX(-100%);
+      }
+      .app-main {
+        margin-left: 0;
+      }
+    }
+
+    /* Top Navbar */
+    .app-header {
+      height: 68px;
+      background-color: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid #E2E8F0;
+      padding: 0 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+    }
+
+    /* Custom Cards & Panels */
+    .card-custom {
+      background-color: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 0.875rem;
+      box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.03), 0 1px 3px -1px rgba(15, 23, 42, 0.02);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card-hover-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.08);
+    }
+
+    .metric-card-icon {
+      width: 2.85rem;
+      height: 2.85rem;
+      border-radius: 0.625rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      transition: transform 0.2s ease;
+    }
+
+    .card-custom:hover .metric-card-icon {
+      transform: scale(1.08);
+    }
+
+    /* Badges */
+    .badge-in-stock {
+      background-color: #D1FAE5;
+      color: #065F46;
+      font-weight: 600;
+      padding: 0.35em 0.7em;
+      border-radius: 0.375rem;
+      font-size: 0.78rem;
+    }
+
+    .badge-low-stock {
+      background-color: #FEF3C7;
+      color: #92400E;
+      font-weight: 600;
+      padding: 0.35em 0.7em;
+      border-radius: 0.375rem;
+      font-size: 0.78rem;
+    }
+
+    .badge-out-stock {
+      background-color: #FEE2E2;
+      color: #991B1B;
+      font-weight: 600;
+      padding: 0.35em 0.7em;
+      border-radius: 0.375rem;
+      font-size: 0.78rem;
+    }
+
+    /* Custom Buttons */
+    .btn-primary-custom {
+      background: linear-gradient(135deg, #0EA5E9, #0284C7);
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 0.6rem 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-primary-custom:hover {
+      background: linear-gradient(135deg, #0284C7, #0369A1);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(14, 165, 233, 0.3);
+      color: white;
+    }
+
+    .form-control, .form-select {
+      border: 1px solid #E2E8F0;
+      border-radius: 0.5rem;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.9rem;
+      transition: all 0.15s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #0EA5E9;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+    }
+
+    /* Tables Styling */
+    .table > :not(caption) > * > * {
+      padding: 0.85rem 1rem;
+      vertical-align: middle;
+    }
+
+    .table thead th {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748B;
+      background-color: #F8FAFC;
+      border-bottom: 1px solid #E2E8F0;
+      font-weight: 600;
+    }
+
+    .table tbody tr {
+      transition: background-color 0.15s ease;
+    }
+
+    .table tbody tr:hover {
+      background-color: #F8FAFC;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 280px;
+      max-height: 280px;
+      width: 100%;
+    }
+
+    .temp-password-banner {
+      background-color: #F0F9FF;
+      border: 1px solid #BAE6FD;
+      border-radius: 0.875rem;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.06);
+    }
+
+    .modal-content {
+      border: 1px solid #E2E8F0;
+      border-radius: 0.875rem;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #F1F5F9;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .modal-footer {
+      border-top: 1px solid #F1F5F9;
+      padding: 1rem 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Mobile Offcanvas Navigation -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+  <div class="offcanvas-header border-bottom">
+    <div class="d-flex align-items-center gap-2">
+      <div class="brand-logo-icon"><i class="fa-solid fa-fill-drip"></i></div>
+      <div>
+        <h6 class="fw-bold mb-0" id="mobileSidebarLabel">Paint IMS V2</h6>
+        <small class="text-secondary extra-small">Paint Shop Management</small>
+      </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body p-2">
+    <% renderNavLinks(user, page); %>
+  </div>
+</div>
+
+<!-- Desktop Fixed Sidebar -->
+<aside class="app-sidebar d-none d-lg-flex">
+  <div class="sidebar-brand">
+    <div class="brand-logo-icon">
+      <i class="fa-solid fa-fill-drip"></i>
+    </div>
+    <div>
+      <h6 class="fw-bold mb-0" style="color: var(--dark);">Paint IMS V2</h6>
+      <small class="text-secondary extra-small" style="font-size: 0.75rem;">Paint Shop Management</small>
+    </div>
+  </div>
+
+  <div class="flex-grow-1 py-3 overflow-y-auto">
+    <% function renderNavLinks(u, p) { %>
+      <div class="px-3 mb-2 text-uppercase extra-small text-secondary fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">Menu</div>
+
+      <a href="/app?page=dashboard" class="nav-link-custom <%= p === 'dashboard' ? 'active' : '' %>">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </a>
+
+      <% if (u.role === 'super_admin') { %>
+        <a href="/app?page=shops" class="nav-link-custom <%= p === 'shops' ? 'active' : '' %>">
+          <i class="fa-solid fa-store"></i> Paint Shops
+        </a>
+        <a href="/app?page=shop_admins" class="nav-link-custom <%= p === 'shop_admins' ? 'active' : '' %>">
+          <i class="fa-solid fa-user-shield"></i> Shop Admins
+        </a>
+      <% } %>
+
+      <a href="/app?page=inventory" class="nav-link-custom <%= p === 'inventory' ? 'active' : '' %>">
+        <i class="fa-solid fa-boxes-stacked"></i> Products Inventory
+      </a>
+
+      <a href="/app?page=stock_in" class="nav-link-custom <%= p === 'stock_in' ? 'active' : '' %>">
+        <i class="fa-solid fa-arrow-down-to-bracket text-success"></i> Stock IN
+      </a>
+
+      <a href="/app?page=stock_out" class="nav-link-custom <%= p === 'stock_out' ? 'active' : '' %>">
+        <i class="fa-solid fa-arrow-up-from-bracket text-danger"></i> Stock OUT
+      </a>
+
+      <a href="/app?page=suppliers" class="nav-link-custom <%= p === 'suppliers' ? 'active' : '' %>">
+        <i class="fa-solid fa-truck-field"></i> Suppliers
+      </a>
+
+      <% if (u.role === 'shop_admin') { %>
+        <a href="/app?page=staff" class="nav-link-custom <%= p === 'staff' ? 'active' : '' %>">
+          <i class="fa-solid fa-users"></i> Staff Members
+        </a>
+      <% } %>
+
+      <a href="/app?page=stock_history" class="nav-link-custom <%= p === 'stock_history' ? 'active' : '' %>">
+        <i class="fa-solid fa-clock-rotate-left"></i> Stock History
+      </a>
+
+      <a href="/app?page=activity" class="nav-link-custom <%= p === 'activity' ? 'active' : '' %>">
+        <i class="fa-solid fa-list-check"></i> Activity Audit Log
+      </a>
+
+      <a href="/app?page=reports" class="nav-link-custom <%= p === 'reports' ? 'active' : '' %>">
+        <i class="fa-solid fa-chart-line"></i> Inventory Reports
+      </a>
+
+      <div class="px-3 mt-4 mb-2 text-uppercase extra-small text-secondary fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">Account</div>
+
+      <a href="/app?page=profile" class="nav-link-custom <%= p === 'profile' ? 'active' : '' %>">
+        <i class="fa-regular fa-id-card"></i> My Profile
+      </a>
+
+      <a href="/app?page=change_password" class="nav-link-custom <%= p === 'change_password' ? 'active' : '' %>">
+        <i class="fa-solid fa-key"></i> Change Password
+      </a>
+    <% } %>
+
+    <% renderNavLinks(user, page); %>
+  </div>
+
+  <div class="p-3 border-top">
+    <a href="/logout" class="btn btn-outline-danger btn-sm w-100 fw-semibold">
+      <i class="fa-solid fa-right-from-bracket me-1"></i> Sign Out
+    </a>
+  </div>
+</aside>
+
+<!-- Main Application Content Area -->
+<div class="app-main">
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-light d-lg-none border" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div>
+        <h5 class="fw-bold mb-0 text-capitalize" style="color: var(--dark);">
+          <%= page.replace('_', ' ') %>
+          <% if (typeof inspectedShop !== 'undefined' && inspectedShop) { %>
+            <span class="badge bg-info-subtle text-info fs-6 fw-normal ms-2">Inspecting: <%= inspectedShop.name %></span>
+          <% } %>
+        </h5>
+        <small class="text-secondary extra-small d-none d-sm-inline">
+          <% if (user.role === 'super_admin') { %>
+            Platform Administrator Dashboard
+          <% } else { %>
+            <%= user.shop_name || 'Paint Shop' %> Management
+          <% } %>
+        </small>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+      <span class="badge rounded-pill text-uppercase px-3 py-2 fw-semibold
+        <%= user.role === 'super_admin' ? 'bg-primary-subtle text-primary' : (user.role === 'shop_admin' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary') %>">
+        <i class="fa-solid <%= user.role === 'super_admin' ? 'fa-user-shield' : 'fa-user-tie' %> me-1"></i>
+        <%= user.role.replace('_', ' ') %>
+      </span>
+
+      <div class="dropdown">
+        <button class="btn btn-light border dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+            <%= user.full_name.charAt(0).toUpperCase() %>
+          </div>
+          <span class="d-none d-md-inline small fw-semibold"><%= user.full_name %></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+          <li class="px-3 py-2 border-bottom">
+            <div class="fw-bold small"><%= user.full_name %></div>
+            <div class="text-muted extra-small"><%= user.email %></div>
+          </li>
+          <li><a class="dropdown-menu-item dropdown-item small py-2" href="/app?page=profile"><i class="fa-regular fa-user me-2"></i> Profile</a></li>
+          <li><a class="dropdown-menu-item dropdown-item small py-2" href="/app?page=change_password"><i class="fa-solid fa-key me-2"></i> Change Password</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-menu-item dropdown-item small py-2 text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Body Container -->
+  <main class="flex-grow-1 p-3 p-md-4">
+
+    <!-- Flash Alert Notice -->
+    <% if (typeof flash !== 'undefined' && flash) { %>
+      <div class="alert alert-<%= flash.type %> alert-dismissible fade show card-custom mb-4" role="alert">
+        <i class="fa-solid <%= flash.type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation' %> me-2"></i>
+        <%= flash.message %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+
+    <!-- Temporary Password Reveal Banner (Shows ONCE when Super Admin creates shop/admin or Shop Admin creates staff) -->
+    <% if (typeof tempNotice !== 'undefined' && tempNotice) { %>
+      <div class="temp-password-banner shadow-sm mb-4">
+        <div class="d-flex align-items-start gap-3">
+          <div class="metric-card-icon bg-warning-subtle text-warning fs-3">
+            <i class="fa-solid fa-key"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="fw-bold text-dark mb-1">
+              <% if (tempNotice.type === 'shop_created') { %>
+                Shop & Shop Admin Created Successfully!
+              <% } else if (tempNotice.type === 'admin_created') { %>
+                Shop Admin Account Created Successfully!
+              <% } else if (tempNotice.type === 'staff_created') { %>
+                Staff Account Created Successfully!
+              <% } else { %>
+                Temporary Password Generated!
+              <% } %>
+            </h6>
+            <div class="row g-2 align-items-center mt-2">
+              <div class="col-12 col-md-auto">
+                <span class="text-secondary small">Email:</span>
+                <strong class="text-dark small ms-1"><%= tempNotice.email %></strong>
+              </div>
+              <div class="col-12 col-md-auto">
+                <span class="text-secondary small">Temporary Password:</span>
+                <code class="bg-white border rounded px-2 py-1 text-danger fw-bold ms-1" id="tempPassText" style="font-size: 1rem;"><%= tempNotice.tempPassword %></code>
+              </div>
+              <div class="col-12 col-md-auto">
+                <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" onclick="copyTempPassword()">
+                  <i class="fa-regular fa-copy me-1"></i> Copy Password
+                </button>
+              </div>
+            </div>
+            <div class="text-danger small mt-2 fw-semibold">
+              <i class="fa-solid fa-shield-halved me-1"></i> Warning: Save this temporary password now. It will NOT be stored in plaintext and cannot be displayed again.
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Mandatory Change Password Alert -->
+    <% if (user.must_change_password && page !== 'change_password') { %>
+      <div class="alert alert-warning card-custom mb-4" role="alert">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <i class="fa-solid fa-lock me-2"></i>
+            <strong>Password Update Required:</strong> You are using a temporary password. Please update your password to proceed.
+          </div>
+          <a href="/app?page=change_password" class="btn btn-warning btn-sm fw-semibold">Change Password Now</a>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 1: DASHBOARD -->
+    <% if (page === 'dashboard') { %>
+      <% if (user.role === 'super_admin') { %>
+        <!-- Super Admin Metrics -->
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card-custom card-hover-lift p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <small class="text-secondary fw-semibold">Total Paint Shops</small>
+                  <h3 class="fw-bold mb-0 mt-1"><%= dashboardData.totalShops %></h3>
+                </div>
+                <div class="metric-card-icon bg-primary-subtle text-primary">
+                  <i class="fa-solid fa-store"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-muted extra-small">
+                <span class="text-success fw-bold"><%= dashboardData.activeShops %> Active</span> • <%= dashboardData.inactiveShops %> Inactive
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card-custom card-hover-lift p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <small class="text-secondary fw-semibold">Shop Admins</small>
+                  <h3 class="fw-bold mb-0 mt-1"><%= dashboardData.totalShopAdmins %></h3>
+                </div>
+                <div class="metric-card-icon bg-success-subtle text-success">
+                  <i class="fa-solid fa-user-shield"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-muted extra-small">
+                <%= dashboardData.totalStaff %> Shop Staff Users
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card-custom card-hover-lift p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <small class="text-secondary fw-semibold">Total Products</small>
+                  <h3 class="fw-bold mb-0 mt-1"><%= dashboardData.totalProducts %></h3>
+                </div>
+                <div class="metric-card-icon bg-info-subtle text-info">
+                  <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-muted extra-small">
+                <%= dashboardData.totalStockUnits %> Stock Units Across Network
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card-custom card-hover-lift p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <small class="text-secondary fw-semibold">Total Inventory Value</small>
+                  <h3 class="fw-bold mb-0 mt-1">$<%= dashboardData.totalInventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></h3>
+                </div>
+                <div class="metric-card-icon bg-warning-subtle text-warning">
+                  <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-muted extra-small">
+                Platform Aggregate Value
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Shops Table -->
+        <div class="card-custom p-4 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Recently Onboarded Paint Shops</h6>
+            <a href="/app?page=shops" class="btn btn-sm btn-outline-primary fw-semibold">View All Shops</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light extra-small text-uppercase">
+                <tr>
+                  <th>Shop Name</th>
+                  <th>Owner</th>
+                  <th>Contact Email</th>
+                  <th>Status</th>
+                  <th>Joined Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (dashboardData.recentShops.length === 0) { %>
+                  <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">No shops registered yet. Click "Paint Shops" to add one.</td>
+                  </tr>
+                <% } else { %>
+                  <% dashboardData.recentShops.forEach(s => { %>
+                    <tr>
+                      <td class="fw-semibold text-dark"><%= s.name %></td>
+                      <td><%= s.owner_name %></td>
+                      <td><%= s.email %></td>
+                      <td>
+                        <span class="badge <%= s.status === 'active' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' %>">
+                          <%= s.status %>
+                        </span>
+                      </td>
+                      <td class="small text-muted"><%= new Date(s.created_at).toLocaleDateString() %></td>
+                      <td>
+                        <a href="/app?page=inventory&inspect_shop_id=<%= s._id %>" class="btn btn-xs btn-light border text-primary" title="Inspect Shop Inventory">
+                          <i class="fa-solid fa-eye me-1"></i> Inspect
+                        </a>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      <% } else { %>
+        <!-- Shop Admin & Staff Dashboard -->
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card-custom card-hover-lift p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <small class="text-secondary fw-semibold">Total Products</small>
+                  <h3 class="fw-bold mb-0 mt-1"><%= dashboardData.totalProducts %></h3>
+                </div>
+                <div class="metric-card-icon bg-primary-subtle text-primary">
+                  <i class="fa-solid fa-paint-roller"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-muted extra-small">
+                <%= dashboardData.totalStock %> Total Units in Stock
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card-custom card-hover-lift p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <small class="text-secondary fw-semibold">Inventory Valuation</small>
+                  <h3 class="fw-bold mb-0 mt-1">$<%= dashboardData.inventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></h3>
+                </div>
+                <div class="metric-card-icon bg-success-subtle text-success">
+                  <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-muted extra-small">
+                Total Retail Selling Value
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card-custom card-hover-lift p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <small class="text-secondary fw-semibold">Low Stock Items</small>
+                  <h3 class="fw-bold mb-0 mt-1 text-warning"><%= dashboardData.lowStockCount %></h3>
+                </div>
+                <div class="metric-card-icon bg-warning-subtle text-warning">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-muted extra-small">
+                Requires Stock Refill
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card-custom card-hover-lift p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <small class="text-secondary fw-semibold">Out of Stock</small>
+                  <h3 class="fw-bold mb-0 mt-1 text-danger"><%= dashboardData.outOfStockCount %></h3>
+                </div>
+                <div class="metric-card-icon bg-danger-subtle text-danger">
+                  <i class="fa-solid fa-circle-xmark"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-muted extra-small">
+                0 Units Available
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-sm-6 col-md-3">
+            <a href="/app?page=stock_in" class="card-custom p-3 d-flex align-items-center gap-3 text-decoration-none text-dark hover-shadow">
+              <div class="metric-card-icon bg-success text-white">
+                <i class="fa-solid fa-plus"></i>
+              </div>
+              <div>
+                <div class="fw-bold">Stock IN</div>
+                <small class="text-secondary">Add new inventory</small>
+              </div>
+            </a>
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <a href="/app?page=stock_out" class="card-custom p-3 d-flex align-items-center gap-3 text-decoration-none text-dark hover-shadow">
+              <div class="metric-card-icon bg-danger text-white">
+                <i class="fa-solid fa-minus"></i>
+              </div>
+              <div>
+                <div class="fw-bold">Stock OUT</div>
+                <small class="text-secondary">Dispatch stock / sales</small>
+              </div>
+            </a>
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <a href="/app?page=inventory" class="card-custom p-3 d-flex align-items-center gap-3 text-decoration-none text-dark hover-shadow">
+              <div class="metric-card-icon bg-primary text-white">
+                <i class="fa-solid fa-boxes-stacked"></i>
+              </div>
+              <div>
+                <div class="fw-bold">All Products</div>
+                <small class="text-secondary">Manage catalog</small>
+              </div>
+            </a>
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <a href="/app?page=suppliers" class="card-custom p-3 d-flex align-items-center gap-3 text-decoration-none text-dark hover-shadow">
+              <div class="metric-card-icon bg-info text-white">
+                <i class="fa-solid fa-truck"></i>
+              </div>
+              <div>
+                <div class="fw-bold">Suppliers</div>
+                <small class="text-secondary"><%= dashboardData.totalSuppliers %> Active Contacts</small>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Charts and Low Stock Section -->
+        <div class="row g-4 mb-4">
+          <div class="col-12 col-lg-7">
+            <div class="card-custom p-4 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="fa-solid fa-chart-simple me-2 text-primary"></i>Stock Categories Distribution</h6>
+              </div>
+              <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-5">
+            <div class="card-custom p-4 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0 text-warning"><i class="fa-solid fa-triangle-exclamation me-2"></i>Low Stock Alerts</h6>
+                <a href="/app?page=inventory&stock_status=low" class="small text-decoration-none" style="color: var(--primary);">View All</a>
+              </div>
+              <% if (dashboardData.lowStockProducts.length === 0) { %>
+                <div class="text-center py-4 text-muted">
+                  <i class="fa-solid fa-circle-check text-success fs-2 mb-2 d-block"></i>
+                  No low stock products! All inventory levels are healthy.
+                </div>
+              <% } else { %>
+                <div class="list-group list-group-flush">
+                  <% dashboardData.lowStockProducts.forEach(p => { %>
+                    <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                      <div>
+                        <div class="fw-semibold text-dark mb-0"><%= p.name %></div>
+                        <small class="text-secondary"><%= p.brand %> • <%= p.category %> (<%= p.size %>)</small>
+                      </div>
+                      <div class="text-end">
+                        <span class="badge badge-low-stock"><%= p.stock %> <%= p.unit %> left</span>
+                        <a href="/app?page=stock_in&product_id=<%= p._id %>" class="btn btn-xs btn-outline-success ms-2">
+                          <i class="fa-solid fa-plus"></i> Refill
+                        </a>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Stock Transactions Table -->
+        <div class="card-custom p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Recent Stock Activity</h6>
+            <a href="/app?page=stock_history" class="btn btn-sm btn-outline-primary fw-semibold">View Full History</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light extra-small text-uppercase">
+                <tr>
+                  <th>Date</th>
+                  <th>Product</th>
+                  <th>Type</th>
+                  <th>Quantity</th>
+                  <th>New Stock</th>
+                  <th>Logged By</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (dashboardData.recentTransactions.length === 0) { %>
+                  <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">No stock transactions recorded yet.</td>
+                  </tr>
+                <% } else { %>
+                  <% dashboardData.recentTransactions.forEach(t => { %>
+                    <tr>
+                      <td class="small text-muted"><%= new Date(t.created_at).toLocaleString() %></td>
+                      <td class="fw-semibold text-dark"><%= t.product_id ? t.product_id.name : 'Unknown Product' %></td>
+                      <td>
+                        <% if (t.type === 'IN') { %>
+                          <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-arrow-down-to-bracket me-1"></i> IN</span>
+                        <% } else { %>
+                          <span class="badge bg-danger-subtle text-danger"><i class="fa-solid fa-arrow-up-from-bracket me-1"></i> OUT</span>
+                        <% } %>
+                      </td>
+                      <td class="fw-bold"><%= t.quantity %></td>
+                      <td><%= t.new_stock %></td>
+                      <td class="small"><%= t.created_by ? t.created_by.full_name : 'System' %></td>
+                      <td class="small text-muted"><%= t.note || '-' %></td>
+                    </tr>
+                  <% }) %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } %>
+    <% } %>
+
+    <!-- PAGE 2: SHOPS MANAGEMENT (SUPER ADMIN) -->
+    <% if (page === 'shops' && user.role === 'super_admin') { %>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h5 class="fw-bold mb-1">Paint Shop Tenants</h5>
+          <p class="text-secondary small mb-0">Manage all onboarded paint shops and their isolated database environments.</p>
+        </div>
+        <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#createShopModal" style="width: auto;">
+          <i class="fa-solid fa-plus me-1"></i> Onboard New Paint Shop
+        </button>
+      </div>
+
+      <div class="card-custom p-4 mb-4">
+        <form action="/app" method="GET" class="row g-2 mb-3">
+          <input type="hidden" name="page" value="shops">
+          <div class="col-12 col-md-6">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+              <input type="text" class="form-control" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Search shops by name, owner, email...">
+              <button class="btn btn-outline-secondary" type="submit">Search</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light extra-small text-uppercase">
+              <tr>
+                <th>Shop Name</th>
+                <th>Owner Name</th>
+                <th>Contact Info</th>
+                <th>Shop Admin</th>
+                <th>Products / Stock</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (shops.length === 0) { %>
+                <tr>
+                  <td colspan="7" class="text-center py-4 text-muted">No shops found.</td>
+                </tr>
+              <% } else { %>
+                <% shops.forEach(s => { %>
+                  <tr>
+                    <td class="fw-bold text-dark"><%= s.name %></td>
+                    <td><%= s.owner_name %></td>
+                    <td class="small">
+                      <div><i class="fa-regular fa-envelope me-1 text-muted"></i><%= s.email %></div>
+                      <div><i class="fa-solid fa-phone me-1 text-muted"></i><%= s.phone || 'N/A' %></div>
+                    </td>
+                    <td class="small">
+                      <% if (s.adminUser) { %>
+                        <div class="fw-semibold"><%= s.adminUser.full_name %></div>
+                        <div class="text-muted extra-small"><%= s.adminUser.email %></div>
+                      <% } else { %>
+                        <span class="text-danger small">No Admin Assigned</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge bg-primary-subtle text-primary"><%= s.productCount %> Products</span>
+                      <span class="badge bg-secondary-subtle text-secondary"><%= s.totalStock %> Units</span>
+                    </td>
+                    <td>
+                      <form action="/app" method="POST" class="d-inline">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="page" value="shops">
+                        <input type="hidden" name="action" value="toggle_shop_status">
+                        <input type="hidden" name="shop_id" value="<%= s._id %>">
+                        <button type="submit" class="btn btn-xs rounded-pill <%= s.status === 'active' ? 'btn-success' : 'btn-danger' %>">
+                          <%= s.status === 'active' ? 'Active' : 'Inactive' %>
+                        </button>
+                      </form>
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="/app?page=inventory&inspect_shop_id=<%= s._id %>" class="btn btn-light border" title="Inspect Shop Inventory">
+                          <i class="fa-solid fa-eye text-primary"></i>
+                        </a>
+                        <button type="button" class="btn btn-light border" title="Edit Shop" onclick="editShopModal('<%= s._id %>', '<%= s.name %>', '<%= s.owner_name %>', '<%= s.email %>', '<%= s.phone %>', '<%= s.address %>', '<%= s.status %>')">
+                          <i class="fa-solid fa-pen-to-square text-secondary"></i>
+                        </button>
+                        <button type="button" class="btn btn-light border text-danger" title="Delete Shop" onclick="confirmDeleteShop('<%= s._id %>', '<%= s.name %>')">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 3: SHOP ADMINS MANAGEMENT (SUPER ADMIN) -->
+    <% if (page === 'shop_admins' && user.role === 'super_admin') { %>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h5 class="fw-bold mb-1">Shop Admin Accounts</h5>
+          <p class="text-secondary small mb-0">Platform security and credentials management for shop owners.</p>
+        </div>
+        <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#createShopAdminModal" style="width: auto;">
+          <i class="fa-solid fa-user-plus me-1"></i> Add Shop Admin
+        </button>
+      </div>
+
+      <div class="card-custom p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light extra-small text-uppercase">
+              <tr>
+                <th>Admin Name</th>
+                <th>Email Address</th>
+                <th>Assigned Paint Shop</th>
+                <th>Account Status</th>
+                <th>Password Status</th>
+                <th>Last Password Change</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (shopAdmins.length === 0) { %>
+                <tr>
+                  <td colspan="7" class="text-center py-4 text-muted">No Shop Admins found.</td>
+                </tr>
+              <% } else { %>
+                <% shopAdmins.forEach(a => { %>
+                  <tr>
+                    <td class="fw-bold text-dark"><%= a.full_name %></td>
+                    <td><%= a.email %></td>
+                    <td>
+                      <% if (a.shop_id) { %>
+                        <span class="badge bg-info-subtle text-info"><%= a.shop_id.name %></span>
+                      <% } else { %>
+                        <span class="text-muted">Unassigned</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <form action="/app" method="POST" class="d-inline">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="page" value="shop_admins">
+                        <input type="hidden" name="action" value="toggle_user_status">
+                        <input type="hidden" name="user_id" value="<%= a._id %>">
+                        <button type="submit" class="btn btn-xs rounded-pill <%= a.is_active ? 'btn-success' : 'btn-secondary' %>">
+                          <%= a.is_active ? 'Enabled' : 'Disabled' %>
+                        </button>
+                      </form>
+                    </td>
+                    <td>
+                      <% if (a.must_change_password) { %>
+                        <span class="badge bg-warning-subtle text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i> Temp Password</span>
+                      <% } else { %>
+                        <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-check me-1"></i> Active</span>
+                      <% } %>
+                    </td>
+                    <td class="small text-muted"><%= new Date(a.password_changed_at || a.created_at).toLocaleDateString() %></td>
+                    <td>
+                      <form action="/app" method="POST" class="d-inline" onsubmit="return confirm('Generate a new temporary password for <%= a.full_name %>?');">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="page" value="shop_admins">
+                        <input type="hidden" name="action" value="reset_admin_password">
+                        <input type="hidden" name="user_id" value="<%= a._id %>">
+                        <button type="submit" class="btn btn-sm btn-outline-warning">
+                          <i class="fa-solid fa-key me-1"></i> Generate Temp Password
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 4: PRODUCTS INVENTORY -->
+    <% if (page === 'inventory') { %>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h5 class="fw-bold mb-1">Paint Products Catalog</h5>
+          <p class="text-secondary small mb-0">View, search, filter, and manage paint stock inventory.</p>
+        </div>
+        <% if (['super_admin', 'shop_admin'].includes(user.role)) { %>
+          <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addProductModal" style="width: auto;">
+            <i class="fa-solid fa-plus me-1"></i> Add New Product
+          </button>
+        <% } %>
+      </div>
+
+      <!-- Filters & Search Bar -->
+      <div class="card-custom p-3 mb-4">
+        <form action="/app" method="GET" class="row g-2 align-items-center">
+          <input type="hidden" name="page" value="inventory">
+          <% if (typeof inspectShopId !== 'undefined' && inspectShopId) { %>
+            <input type="hidden" name="inspect_shop_id" value="<%= inspectShopId %>">
+          <% } %>
+
+          <div class="col-12 col-md-3">
+            <input type="text" class="form-control" name="search" value="<%= query.search || '' %>" placeholder="Search product, brand, shade...">
+          </div>
+
+          <div class="col-6 col-md-2">
+            <select class="form-select" name="brand" onchange="this.form.submit()">
+              <option value="">All Brands</option>
+              <% distinctBrands.forEach(b => { %>
+                <option value="<%= b %>" <%= query.brand === b ? 'selected' : '' %>><%= b %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="col-6 col-md-2">
+            <select class="form-select" name="category" onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              <% distinctCategories.forEach(c => { %>
+                <option value="<%= c %>" <%= query.category === c ? 'selected' : '' %>><%= c %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="col-6 col-md-2">
+            <select class="form-select" name="stock_status" onchange="this.form.submit()">
+              <option value="">All Stock Levels</option>
+              <option value="in" <%= query.stock_status === 'in' ? 'selected' : '' %>>Healthy Stock</option>
+              <option value="low" <%= query.stock_status === 'low' ? 'selected' : '' %>>Low Stock</option>
+              <option value="out" <%= query.stock_status === 'out' ? 'selected' : '' %>>Out of Stock</option>
+            </select>
+          </div>
+
+          <div class="col-6 col-md-2">
+            <select class="form-select" name="sort" onchange="this.form.submit()">
+              <option value="">Sort By</option>
+              <option value="stock_low" <%= query.sort === 'stock_low' ? 'selected' : '' %>>Lowest Stock First</option>
+              <option value="stock_high" <%= query.sort === 'stock_high' ? 'selected' : '' %>>Highest Stock First</option>
+              <option value="price_high" <%= query.sort === 'price_high' ? 'selected' : '' %>>Price: High to Low</option>
+              <option value="price_low" <%= query.sort === 'price_low' ? 'selected' : '' %>>Price: Low to High</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-1">
+            <a href="/app?page=inventory<%= inspectShopId ? '&inspect_shop_id=' + inspectShopId : '' %>" class="btn btn-outline-secondary w-100" title="Reset Filters">
+              <i class="fa-solid fa-arrows-rotate"></i>
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Products Table -->
+      <div class="card-custom p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light extra-small text-uppercase">
+              <tr>
+                <th>Product Name</th>
+                <th>Brand & Category</th>
+                <th>Shade / Size</th>
+                <th>Current Stock</th>
+                <th>Prices</th>
+                <th>Supplier</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (products.length === 0) { %>
+                <tr>
+                  <td colspan="8" class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-box-open fs-2 mb-2 d-block"></i>
+                    No products added yet matching filters.
+                  </td>
+                </tr>
+              <% } else { %>
+                <% products.forEach(p => { %>
+                  <tr>
+                    <td>
+                      <div class="fw-bold text-dark"><%= p.name %></div>
+                      <small class="text-muted"><%= p.description || 'No description' %></small>
+                    </td>
+                    <td>
+                      <div class="fw-semibold small"><%= p.brand %></div>
+                      <small class="text-secondary"><%= p.category %></small>
+                    </td>
+                    <td class="small">
+                      <div>Shade: <%= p.shade || 'N/A' %></div>
+                      <span class="badge bg-light text-dark border"><%= p.size %></span>
+                    </td>
+                    <td>
+                      <div class="fw-bold fs-6"><%= p.stock %> <span class="small fw-normal text-muted"><%= p.unit %></span></div>
+                      <small class="extra-small text-muted">Min: <%= p.minimum_stock %></small>
+                    </td>
+                    <td class="small">
+                      <div>Selling: <strong class="text-success">$<%= p.selling_price.toFixed(2) %></strong></div>
+                      <div class="text-muted extra-small">Cost: $<%= p.purchase_price.toFixed(2) %></div>
+                    </td>
+                    <td class="small text-secondary">
+                      <%= p.supplier_id ? p.supplier_id.name : 'N/A' %>
+                    </td>
+                    <td>
+                      <% if (p.stock === 0) { %>
+                        <span class="badge badge-out-stock"><i class="fa-solid fa-circle-xmark me-1"></i> Out of Stock</span>
+                      <% } else if (p.stock <= p.minimum_stock) { %>
+                        <span class="badge badge-low-stock"><i class="fa-solid fa-triangle-exclamation me-1"></i> Low Stock</span>
+                      <% } else { %>
+                        <span class="badge badge-in-stock"><i class="fa-solid fa-check me-1"></i> In Stock</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="/app?page=stock_in&product_id=<%= p._id %>" class="btn btn-light border text-success" title="Stock IN">
+                          <i class="fa-solid fa-plus"></i>
+                        </a>
+                        <a href="/app?page=stock_out&product_id=<%= p._id %>" class="btn btn-light border text-danger" title="Stock OUT">
+                          <i class="fa-solid fa-minus"></i>
+                        </a>
+                        <% if (['super_admin', 'shop_admin'].includes(user.role)) { %>
+                          <button type="button" class="btn btn-light border" title="Edit Product" onclick='editProductModal(<%= JSON.stringify(p) %>)'>
+                            <i class="fa-solid fa-pen-to-square text-secondary"></i>
+                          </button>
+                          <button type="button" class="btn btn-light border text-danger" title="Delete Product" onclick="confirmDeleteProduct('<%= p._id %>', '<%= p.name %>')">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        <% } %>
+                      </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 5: STOCK IN -->
+    <% if (page === 'stock_in') { %>
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="card-custom p-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-arrow-down-to-bracket text-success me-2"></i>Stock IN (Add Inventory)</h5>
+            <p class="text-secondary small mb-4">Record new paint inventory received from suppliers into stock.</p>
+
+            <form action="/app" method="POST">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="page" value="stock_in">
+              <input type="hidden" name="action" value="stock_in">
+
+              <div class="mb-3">
+                <label for="product_id" class="form-label small fw-semibold text-secondary">Select Product</label>
+                <select class="form-select" id="product_id" name="product_id" required>
+                  <option value="">-- Choose Paint Product --</option>
+                  <% products.forEach(p => { %>
+                    <option value="<%= p._id %>" <%= selectedProductId === p._id.toString() ? 'selected' : '' %>>
+                      <%= p.name %> (<%= p.brand %> - <%= p.shade %> <%= p.size %>) - Current Stock: <%= p.stock %> <%= p.unit %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="quantity" class="form-label small fw-semibold text-secondary">Quantity to Add</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required placeholder="e.g. 50">
+              </div>
+
+              <div class="mb-3">
+                <label for="note" class="form-label small fw-semibold text-secondary">Note / Invoice Ref (Optional)</label>
+                <input type="text" class="form-control" id="note" name="note" placeholder="e.g. Invoice #PO-9821 from Supplier">
+              </div>
+
+              <button type="submit" class="btn btn-success fw-semibold w-100 py-2">
+                <i class="fa-solid fa-plus me-1"></i> Save Stock IN
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 6: STOCK OUT -->
+    <% if (page === 'stock_out') { %>
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="card-custom p-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-arrow-up-from-bracket text-danger me-2"></i>Stock OUT (Dispatch Inventory)</h5>
+            <p class="text-secondary small mb-4">Record dispatched paint stock for customer sales or job usage.</p>
+
+            <form action="/app" method="POST">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="page" value="stock_out">
+              <input type="hidden" name="action" value="stock_out">
+
+              <div class="mb-3">
+                <label for="product_id" class="form-label small fw-semibold text-secondary">Select Product</label>
+                <select class="form-select" id="product_id" name="product_id" required>
+                  <option value="">-- Choose Paint Product --</option>
+                  <% products.forEach(p => { %>
+                    <option value="<%= p._id %>" <%= selectedProductId === p._id.toString() ? 'selected' : '' %>>
+                      <%= p.name %> (<%= p.brand %> - <%= p.shade %> <%= p.size %>) - Available: <%= p.stock %> <%= p.unit %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="quantity" class="form-label small fw-semibold text-secondary">Quantity to Dispatch</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required placeholder="e.g. 10">
+              </div>
+
+              <div class="mb-3">
+                <label for="note" class="form-label small fw-semibold text-secondary">Note / Order Ref (Optional)</label>
+                <input type="text" class="form-control" id="note" name="note" placeholder="e.g. Sale Order #842">
+              </div>
+
+              <button type="submit" class="btn btn-danger fw-semibold w-100 py-2">
+                <i class="fa-solid fa-minus me-1"></i> Save Stock OUT
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 7: SUPPLIERS -->
+    <% if (page === 'suppliers') { %>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h5 class="fw-bold mb-1">Suppliers Directory</h5>
+          <p class="text-secondary small mb-0">Manage paint manufacturers and distribution contacts.</p>
+        </div>
+        <% if (['super_admin', 'shop_admin'].includes(user.role)) { %>
+          <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addSupplierModal" style="width: auto;">
+            <i class="fa-solid fa-plus me-1"></i> Add Supplier
+          </button>
+        <% } %>
+      </div>
+
+      <div class="card-custom p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light extra-small text-uppercase">
+              <tr>
+                <th>Supplier Name</th>
+                <th>Phone Number</th>
+                <th>Email Address</th>
+                <th>Physical Address</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (suppliers.length === 0) { %>
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-muted">No suppliers added yet.</td>
+                </tr>
+              <% } else { %>
+                <% suppliers.forEach(sup => { %>
+                  <tr>
+                    <td class="fw-bold text-dark"><%= sup.name %></td>
+                    <td><%= sup.phone || 'N/A' %></td>
+                    <td><%= sup.email || 'N/A' %></td>
+                    <td class="small text-muted"><%= sup.address || 'N/A' %></td>
+                    <td>
+                      <% if (['super_admin', 'shop_admin'].includes(user.role)) { %>
+                        <div class="btn-group btn-group-sm">
+                          <button type="button" class="btn btn-light border" onclick='editSupplierModal(<%= JSON.stringify(sup) %>)'>
+                            <i class="fa-solid fa-pen-to-square text-secondary"></i>
+                          </button>
+                          <form action="/app" method="POST" class="d-inline" onsubmit="return confirm('Delete supplier <%= sup.name %>?');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" name="page" value="suppliers">
+                            <input type="hidden" name="action" value="delete_supplier">
+                            <input type="hidden" name="supplier_id" value="<%= sup._id %>">
+                            <button type="submit" class="btn btn-light border text-danger">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          </form>
+                        </div>
+                      <% } else { %>
+                        <span class="text-muted small">View Only</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 8: STAFF MEMBERS (SHOP ADMIN ONLY) -->
+    <% if (page === 'staff' && user.role === 'shop_admin') { %>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h5 class="fw-bold mb-1">Shop Staff Members</h5>
+          <p class="text-secondary small mb-0">Manage staff access to inventory and stock operations.</p>
+        </div>
+        <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addStaffModal" style="width: auto;">
+          <i class="fa-solid fa-user-plus me-1"></i> Add Staff Member
+        </button>
+      </div>
+
+      <div class="card-custom p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light extra-small text-uppercase">
+              <tr>
+                <th>Full Name</th>
+                <th>Email Address</th>
+                <th>Status</th>
+                <th>Password Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (staffMembers.length === 0) { %>
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-muted">No staff members created yet.</td>
+                </tr>
+              <% } else { %>
+                <% staffMembers.forEach(sm => { %>
+                  <tr>
+                    <td class="fw-bold text-dark"><%= sm.full_name %></td>
+                    <td><%= sm.email %></td>
+                    <td>
+                      <form action="/app" method="POST" class="d-inline">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="page" value="staff">
+                        <input type="hidden" name="action" value="toggle_staff_status">
+                        <input type="hidden" name="staff_id" value="<%= sm._id %>">
+                        <button type="submit" class="btn btn-xs rounded-pill <%= sm.is_active ? 'btn-success' : 'btn-secondary' %>">
+                          <%= sm.is_active ? 'Active' : 'Disabled' %>
+                        </button>
+                      </form>
+                    </td>
+                    <td>
+                      <% if (sm.must_change_password) { %>
+                        <span class="badge bg-warning-subtle text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i> Temp Password</span>
+                      <% } else { %>
+                        <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-check me-1"></i> Active</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <form action="/app" method="POST" class="d-inline me-1" onsubmit="return confirm('Generate a new temporary password for <%= sm.full_name %>?');">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="page" value="staff">
+                        <input type="hidden" name="action" value="reset_staff_password">
+                        <input type="hidden" name="staff_id" value="<%= sm._id %>">
+                        <button type="submit" class="btn btn-sm btn-outline-warning">
+                          <i class="fa-solid fa-key me-1"></i> Reset Password
+                        </button>
+                      </form>
+
+                      <form action="/app" method="POST" class="d-inline" onsubmit="return confirm('Remove staff member <%= sm.full_name %>?');">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="page" value="staff">
+                        <input type="hidden" name="action" value="delete_staff">
+                        <input type="hidden" name="staff_id" value="<%= sm._id %>">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 9: STOCK HISTORY -->
+    <% if (page === 'stock_history') { %>
+      <div class="card-custom p-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Stock Movement History</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light extra-small text-uppercase">
+              <tr>
+                <th>Date & Time</th>
+                <th>Product</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Previous Stock</th>
+                <th>New Stock</th>
+                <th>Logged By</th>
+                <th>Note / Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (transactions.length === 0) { %>
+                <tr>
+                  <td colspan="8" class="text-center py-4 text-muted">No stock transactions recorded.</td>
+                </tr>
+              <% } else { %>
+                <% transactions.forEach(t => { %>
+                  <tr>
+                    <td class="small text-muted"><%= new Date(t.created_at).toLocaleString() %></td>
+                    <td class="fw-semibold text-dark"><%= t.product_id ? t.product_id.name : 'Unknown Product' %></td>
+                    <td>
+                      <% if (t.type === 'IN') { %>
+                        <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-arrow-down-to-bracket me-1"></i> IN</span>
+                      <% } else { %>
+                        <span class="badge bg-danger-subtle text-danger"><i class="fa-solid fa-arrow-up-from-bracket me-1"></i> OUT</span>
+                      <% } %>
+                    </td>
+                    <td class="fw-bold"><%= t.quantity %></td>
+                    <td><%= t.previous_stock %></td>
+                    <td class="fw-semibold"><%= t.new_stock %></td>
+                    <td class="small"><%= t.created_by ? t.created_by.full_name : 'System' %></td>
+                    <td class="small text-muted"><%= t.note || '-' %></td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 10: ACTIVITY AUDIT LOG -->
+    <% if (page === 'activity') { %>
+      <div class="card-custom p-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-check text-primary me-2"></i>System Activity Audit Log</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light extra-small text-uppercase">
+              <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (activities.length === 0) { %>
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted">No activity logged yet.</td>
+                </tr>
+              <% } else { %>
+                <% activities.forEach(act => { %>
+                  <tr>
+                    <td class="small text-muted" style="white-space: nowrap;"><%= new Date(act.created_at).toLocaleString() %></td>
+                    <td>
+                      <div class="fw-semibold text-dark small"><%= act.user_id ? act.user_id.full_name : 'System' %></div>
+                      <small class="text-muted extra-small"><%= act.user_id ? act.user_id.role : '' %></small>
+                    </td>
+                    <td>
+                      <span class="badge bg-primary-subtle text-primary"><%= act.action %></span>
+                    </td>
+                    <td class="small"><%= act.description %></td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 11: REPORTS -->
+    <% if (page === 'reports') { %>
+      <div class="row g-4">
+        <div class="col-12 col-md-4">
+          <div class="card-custom p-4 text-center">
+            <small class="text-secondary fw-semibold">Total Inventory Value</small>
+            <h3 class="fw-bold text-success mt-2">$<%= reportData.totalInventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2}) %></h3>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card-custom p-4 text-center">
+            <small class="text-secondary fw-semibold">Total Cost Value</small>
+            <h3 class="fw-bold text-primary mt-2">$<%= reportData.totalInventoryCost.toLocaleString(undefined, {minimumFractionDigits: 2}) %></h3>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card-custom p-4 text-center">
+            <small class="text-secondary fw-semibold">Estimated Gross Margin</small>
+            <h3 class="fw-bold text-info mt-2">$<%= reportData.estimatedMargin.toLocaleString(undefined, {minimumFractionDigits: 2}) %></h3>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="card-custom p-4">
+            <h6 class="fw-bold mb-3">Top 10 Inventory Valuation Items</h6>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light extra-small text-uppercase">
+                  <tr>
+                    <th>Product</th>
+                    <th>Supplier</th>
+                    <th>Stock Level</th>
+                    <th>Selling Price</th>
+                    <th>Total Inventory Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% reportData.topStocked.forEach(p => { %>
+                    <tr>
+                      <td class="fw-semibold text-dark"><%= p.name %> (<%= p.brand %>)</td>
+                      <td class="small"><%= p.supplier_id ? p.supplier_id.name : 'N/A' %></td>
+                      <td><%= p.stock %> <%= p.unit %></td>
+                      <td>$<%= p.selling_price.toFixed(2) %></td>
+                      <td class="fw-bold text-success">$<%= (p.stock * p.selling_price).toFixed(2) %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 12: MY PROFILE -->
+    <% if (page === 'profile') { %>
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="card-custom p-4">
+            <div class="text-center mb-4">
+              <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center fw-bold fs-3 mb-2" style="width: 70px; height: 70px;">
+                <%= profileUser.full_name.charAt(0).toUpperCase() %>
+              </div>
+              <h5 class="fw-bold mb-0"><%= profileUser.full_name %></h5>
+              <span class="badge bg-primary-subtle text-primary text-uppercase mt-1"><%= profileUser.role.replace('_', ' ') %></span>
+            </div>
+
+            <div class="border-top pt-3">
+              <div class="row g-3">
+                <div class="col-6">
+                  <small class="text-secondary d-block">Email Address</small>
+                  <strong class="text-dark"><%= profileUser.email %></strong>
+                </div>
+                <div class="col-6">
+                  <small class="text-secondary d-block">Account Status</small>
+                  <strong class="text-success">Active</strong>
+                </div>
+                <% if (profileUser.shop_id) { %>
+                  <div class="col-12">
+                    <small class="text-secondary d-block">Assigned Paint Shop</small>
+                    <strong class="text-dark"><%= profileUser.shop_id.name %></strong>
+                    <div class="text-muted small"><%= profileUser.shop_id.address %></div>
+                  </div>
+                <% } %>
+                <div class="col-12">
+                  <small class="text-secondary d-block">Joined Date</small>
+                  <span class="text-dark"><%= new Date(profileUser.created_at).toLocaleDateString() %></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top text-center">
+              <a href="/app?page=change_password" class="btn btn-outline-primary btn-sm fw-semibold">
+                <i class="fa-solid fa-key me-1"></i> Update Password
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- PAGE 13: CHANGE PASSWORD -->
+    <% if (page === 'change_password') { %>
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-5">
+          <div class="card-custom p-4">
+            <h5 class="fw-bold mb-2"><i class="fa-solid fa-key text-primary me-2"></i>Change Account Password</h5>
+            <p class="text-secondary small mb-4">Update your password securely. Minimum 8 characters required.</p>
+
+            <form action="/app" method="POST">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="page" value="change_password">
+              <input type="hidden" name="action" value="change_password">
+
+              <div class="mb-3">
+                <label for="current_password" class="form-label small fw-semibold text-secondary">Current Password</label>
+                <input type="password" class="form-control" id="current_password" name="current_password" required placeholder="••••••••">
+              </div>
+
+              <div class="mb-3">
+                <label for="new_password" class="form-label small fw-semibold text-secondary">New Password (min 8 characters)</label>
+                <input type="password" class="form-control" id="new_password" name="new_password" required minlength="8" placeholder="••••••••">
+              </div>
+
+              <div class="mb-4">
+                <label for="confirm_password" class="form-label small fw-semibold text-secondary">Confirm New Password</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="8" placeholder="••••••••">
+              </div>
+
+              <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                Save New Password
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+  </main>
+</div>
+
+<!-- MODALS SECTION -->
+
+<!-- Modal 1: Add Product -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-bold"><i class="fa-solid fa-plus text-primary me-2"></i>Add New Paint Product</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/app" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="page" value="inventory">
+        <input type="hidden" name="action" value="add_product">
+        <% if (typeof inspectShopId !== 'undefined' && inspectShopId) { %>
+          <input type="hidden" name="shop_id" value="<%= inspectShopId %>">
+        <% } %>
+
+        <div class="modal-body row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Product Name *</label>
+            <input type="text" class="form-control" name="name" required placeholder="e.g. Premium WeatherShield Exterior">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Brand</label>
+            <input type="text" class="form-control" name="brand" placeholder="e.g. Dulux, Asian Paints">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Category</label>
+            <input type="text" class="form-control" name="category" placeholder="e.g. Exterior Emulsion">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Shade / Color Code</label>
+            <input type="text" class="form-control" name="shade" placeholder="e.g. Off-White / #F8F8F8">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Container Size</label>
+            <input type="text" class="form-control" name="size" placeholder="e.g. 1L, 4L, 20L">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Purchase Price ($)</label>
+            <input type="number" step="0.01" class="form-control" name="purchase_price" placeholder="0.00">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Selling Price ($)</label>
+            <input type="number" step="0.01" class="form-control" name="selling_price" placeholder="0.00">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Initial Stock</label>
+            <input type="number" class="form-control" name="stock" value="0" min="0">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Minimum Stock Threshold</label>
+            <input type="number" class="form-control" name="minimum_stock" value="5" min="0">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Supplier</label>
+            <select class="form-select" name="supplier_id">
+              <option value="">-- Optional Supplier --</option>
+              <% if (typeof suppliers !== 'undefined') { %>
+                <% suppliers.forEach(sup => { %>
+                  <option value="<%= sup._id %>"><%= sup.name %></option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Description</label>
+            <textarea class="form-control" name="description" rows="2" placeholder="Optional notes..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-custom" style="width: auto;">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Edit Product -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square text-primary me-2"></i>Edit Paint Product</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/app" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="page" value="inventory">
+        <input type="hidden" name="action" value="edit_product">
+        <input type="hidden" name="product_id" id="edit_product_id">
+
+        <div class="modal-body row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Product Name *</label>
+            <input type="text" class="form-control" id="edit_name" name="name" required>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Brand</label>
+            <input type="text" class="form-control" id="edit_brand" name="brand">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Category</label>
+            <input type="text" class="form-control" id="edit_category" name="category">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Shade</label>
+            <input type="text" class="form-control" id="edit_shade" name="shade">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Size</label>
+            <input type="text" class="form-control" id="edit_size" name="size">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Purchase Price ($)</label>
+            <input type="number" step="0.01" class="form-control" id="edit_purchase_price" name="purchase_price">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Selling Price ($)</label>
+            <input type="number" step="0.01" class="form-control" id="edit_selling_price" name="selling_price">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small fw-semibold text-secondary">Min Stock Threshold</label>
+            <input type="number" class="form-control" id="edit_minimum_stock" name="minimum_stock">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Supplier</label>
+            <select class="form-select" id="edit_supplier_id" name="supplier_id">
+              <option value="">-- Optional Supplier --</option>
+              <% if (typeof suppliers !== 'undefined') { %>
+                <% suppliers.forEach(sup => { %>
+                  <option value="<%= sup._id %>"><%= sup.name %></option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Description</label>
+            <textarea class="form-control" id="edit_description" name="description" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-custom" style="width: auto;">Update Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 3: Add Supplier -->
+<div class="modal fade" id="addSupplierModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-bold"><i class="fa-solid fa-truck text-primary me-2"></i>Add Supplier</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/app" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="page" value="suppliers">
+        <input type="hidden" name="action" value="add_supplier">
+
+        <div class="modal-body row g-3">
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Supplier Name *</label>
+            <input type="text" class="form-control" name="name" required placeholder="e.g. Dulux Paints Wholesale Distribution">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-secondary">Phone</label>
+            <input type="text" class="form-control" name="phone" placeholder="+1 555-0192">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-secondary">Email</label>
+            <input type="email" class="form-control" name="email" placeholder="sales@duluxdist.com">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Address</label>
+            <textarea class="form-control" name="address" rows="2" placeholder="Warehouse address..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-custom" style="width: auto;">Save Supplier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 4: Edit Supplier -->
+<div class="modal fade" id="editSupplierModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square text-primary me-2"></i>Edit Supplier</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/app" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="page" value="suppliers">
+        <input type="hidden" name="action" value="edit_supplier">
+        <input type="hidden" name="supplier_id" id="edit_sup_id">
+
+        <div class="modal-body row g-3">
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Supplier Name *</label>
+            <input type="text" class="form-control" id="edit_sup_name" name="name" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-secondary">Phone</label>
+            <input type="text" class="form-control" id="edit_sup_phone" name="phone">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-secondary">Email</label>
+            <input type="email" class="form-control" id="edit_sup_email" name="email">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Address</label>
+            <textarea class="form-control" id="edit_sup_address" name="address" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-custom" style="width: auto;">Update Supplier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 5: Add Staff -->
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-bold"><i class="fa-solid fa-user-plus text-primary me-2"></i>Add Staff Member</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/app" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="page" value="staff">
+        <input type="hidden" name="action" value="add_staff">
+
+        <div class="modal-body row g-3">
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Full Name *</label>
+            <input type="text" class="form-control" name="full_name" required placeholder="e.g. John Miller">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Email Address *</label>
+            <input type="email" class="form-control" name="email" required placeholder="staff@paintshop.com">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Temporary Password (Optional)</label>
+            <input type="text" class="form-control" name="temp_password" placeholder="Auto-generated if left blank">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-custom" style="width: auto;">Create Staff Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 6: Create Shop (Super Admin) -->
+<div class="modal fade" id="createShopModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-bold"><i class="fa-solid fa-store text-primary me-2"></i>Onboard New Paint Shop</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/app" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="page" value="shops">
+        <input type="hidden" name="action" value="create_shop">
+
+        <div class="modal-body row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Shop Name *</label>
+            <input type="text" class="form-control" name="name" required placeholder="e.g. Rainbow Paint Depot">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Owner Name *</label>
+            <input type="text" class="form-control" name="owner_name" required placeholder="e.g. Robert Smith">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-secondary">Shop Email *</label>
+            <input type="email" class="form-control" name="email" required placeholder="info@rainbowpaints.com">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-secondary">Phone Number</label>
+            <input type="text" class="form-control" name="phone" placeholder="+1 800-555-0199">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Address</label>
+            <input type="text" class="form-control" name="address" placeholder="123 Industrial Parkway, Suite A">
+          </div>
+          <hr class="my-2">
+          <h6 class="fw-bold text-dark mb-0">Shop Admin Account Credentials</h6>
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Shop Admin Login Email *</label>
+            <input type="email" class="form-control" name="admin_email" required placeholder="admin@rainbowpaints.com">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Temporary Password (Optional)</label>
+            <input type="text" class="form-control" name="temp_password" placeholder="Auto-generated if left blank">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-custom" style="width: auto;">Onboard Shop</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 7: Create Shop Admin (Super Admin) -->
+<div class="modal fade" id="createShopAdminModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-bold"><i class="fa-solid fa-user-shield text-primary me-2"></i>Create Shop Admin Account</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/app" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="page" value="shop_admins">
+        <input type="hidden" name="action" value="create_shop_admin">
+
+        <div class="modal-body row g-3">
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Assign To Shop *</label>
+            <select class="form-select" name="shop_id" required>
+              <option value="">-- Choose Paint Shop --</option>
+              <% if (typeof allShops !== 'undefined') { %>
+                <% allShops.forEach(s => { %>
+                  <option value="<%= s._id %>"><%= s.name %> (<%= s.owner_name %>)</option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Full Name *</label>
+            <input type="text" class="form-control" name="full_name" required placeholder="e.g. Sarah Connor">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Email Address *</label>
+            <input type="email" class="form-control" name="email" required placeholder="s.connor@shop.com">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-secondary">Temporary Password (Optional)</label>
+            <input type="text" class="form-control" name="temp_password" placeholder="Auto-generated if left blank">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-custom" style="width: auto;">Create Admin Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 8: Delete Confirmation -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Confirm Delete</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/app" method="POST" id="deleteConfirmForm">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="page" id="delete_page">
+        <input type="hidden" name="action" id="delete_action">
+        <input type="hidden" name="product_id" id="delete_product_id">
+        <input type="hidden" name="shop_id" id="delete_shop_id">
+
+        <div class="modal-body">
+          <p class="mb-0" id="deleteConfirmMessage">Are you sure you want to delete this item? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Yes, Delete Permanently</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyTempPassword() {
+    const passElem = document.getElementById('tempPassText');
+    if (!passElem) return;
+    navigator.clipboard.writeText(passElem.innerText).then(() => {
+      alert('Temporary password copied to clipboard!');
+    }).catch(err => {
+      alert('Failed to copy text: ' + err);
+    });
+  }
+
+  function editProductModal(p) {
+    document.getElementById('edit_product_id').value = p._id;
+    document.getElementById('edit_name').value = p.name || '';
+    document.getElementById('edit_brand').value = p.brand || '';
+    document.getElementById('edit_category').value = p.category || '';
+    document.getElementById('edit_shade').value = p.shade || '';
+    document.getElementById('edit_size').value = p.size || '';
+    document.getElementById('edit_purchase_price').value = p.purchase_price || 0;
+    document.getElementById('edit_selling_price').value = p.selling_price || 0;
+    document.getElementById('edit_minimum_stock').value = p.minimum_stock || 5;
+    document.getElementById('edit_supplier_id').value = p.supplier_id ? (p.supplier_id._id || p.supplier_id) : '';
+    document.getElementById('edit_description').value = p.description || '';
+
+    const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+    modal.show();
+  }
+
+  function editSupplierModal(sup) {
+    document.getElementById('edit_sup_id').value = sup._id;
+    document.getElementById('edit_sup_name').value = sup.name || '';
+    document.getElementById('edit_sup_phone').value = sup.phone || '';
+    document.getElementById('edit_sup_email').value = sup.email || '';
+    document.getElementById('edit_sup_address').value = sup.address || '';
+
+    const modal = new bootstrap.Modal(document.getElementById('editSupplierModal'));
+    modal.show();
+  }
+
+  function confirmDeleteProduct(id, name) {
+    document.getElementById('delete_page').value = 'inventory';
+    document.getElementById('delete_action').value = 'delete_product';
+    document.getElementById('delete_product_id').value = id;
+    document.getElementById('deleteConfirmMessage').innerText = `Are you sure you want to delete product "${name}" from inventory?`;
+
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    modal.show();
+  }
+
+  function confirmDeleteShop(id, name) {
+    document.getElementById('delete_page').value = 'shops';
+    document.getElementById('delete_action').value = 'delete_shop';
+    document.getElementById('delete_shop_id').value = id;
+    document.getElementById('deleteConfirmMessage').innerText = `Are you sure you want to delete shop "${name}"? This will permanently delete all shop users, products, suppliers, and stock transactions!`;
+
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    modal.show();
+  }
+</script>
+
+<% if (page === 'dashboard' && typeof dashboardData !== 'undefined' && dashboardData.categoryBreakdown) { %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('categoryChart');
+    if (ctx) {
+      const labels = [<%= dashboardData.categoryBreakdown.map(c => `'${c._id || "General"}'`).join(',') %>];
+      const data = [<%= dashboardData.categoryBreakdown.map(c => c.count).join(',') %>];
+
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.length > 0 ? labels : ['General'],
+          datasets: [{
+            data: data.length > 0 ? data : [1],
+            backgroundColor: ['#0EA5E9', '#10B981', '#F59E0B', '#6366F1', '#EC4899', '#64748B', '#0284C7'],
+            borderWidth: 2,
+            borderColor: '#FFFFFF',
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            legend: { 
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 18,
+                font: {
+                  family: "'Inter', sans-serif",
+                  size: 12,
+                  weight: '500'
+                }
+              }
+            },
+            tooltip: {
+              padding: 10,
+              cornerRadius: 8,
+              backgroundColor: '#0F172A',
+              titleFont: { family: "'Inter', sans-serif", size: 13, weight: '600' },
+              bodyFont: { family: "'Inter', sans-serif", size: 12 }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+<% } %>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
