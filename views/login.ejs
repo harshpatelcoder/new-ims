@@ -16,18 +16,17 @@
     :root {
       --primary: #0EA5E9;
       --primary-hover: #0284C7;
-      --primary-light: #E0F2FE;
-      --dark: #0F172A;
-      --secondary: #64748B;
-      --bg: #F8FAFC;
-      --card-bg: #FFFFFF;
-      --border: #E2E8F0;
+      --dark-slate: #0F172A;
+      --card-bg: #1E293B;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border-color: rgba(255, 255, 255, 0.1);
     }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12) 0%, rgba(248, 250, 252, 1) 75%);
-      color: var(--dark);
+      background: radial-gradient(circle at 50% 10%, #1E293B 0%, #0F172A 70%, #020617 100%);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -35,89 +34,95 @@
       padding: 1.5rem;
       margin: 0;
       position: relative;
+      overflow-x: hidden;
     }
 
     body::before {
       content: '';
       position: absolute;
-      top: -100px;
+      top: -120px;
       right: -100px;
-      width: 350px;
-      height: 350px;
-      background: rgba(14, 165, 233, 0.08);
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, rgba(14, 165, 233, 0) 70%);
       border-radius: 50%;
-      filter: blur(80px);
       pointer-events: none;
     }
 
     body::after {
       content: '';
       position: absolute;
-      bottom: -100px;
+      bottom: -120px;
       left: -100px;
-      width: 350px;
-      height: 350px;
-      background: rgba(99, 102, 241, 0.06);
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0) 70%);
       border-radius: 50%;
-      filter: blur(80px);
       pointer-events: none;
     }
 
     .login-card {
-      background: var(--card-bg);
-      border: 1px solid rgba(226, 232, 240, 0.9);
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 1.25rem;
-      box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.07), 0 0 1px 1px rgba(255, 255, 255, 0.8) inset;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45), 0 0 1px 1px rgba(255, 255, 255, 0.08) inset;
       width: 100%;
       max-width: 440px;
       padding: 2.75rem 2.25rem;
       position: relative;
       z-index: 10;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
     .brand-icon {
-      width: 3.5rem;
-      height: 3.5rem;
-      background: linear-gradient(135deg, #38BDF8, #0EA5E9, #0284C7);
+      width: 3.75rem;
+      height: 3.75rem;
+      background: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 50%, #0284C7 100%);
       color: white;
-      border-radius: 1rem;
+      border-radius: 1.1rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.6rem;
+      font-size: 1.75rem;
       margin: 0 auto 1.25rem auto;
-      box-shadow: 0 8px 20px -4px rgba(14, 165, 233, 0.4);
+      box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.5);
       transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .login-card:hover .brand-icon {
-      transform: scale(1.05) rotate(-3deg);
+      transform: scale(1.08) rotate(-4deg);
     }
 
     .form-control {
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 0.625rem;
-      padding: 0.7rem 0.9rem;
+      padding: 0.75rem 0.95rem;
       font-size: 0.95rem;
       transition: all 0.2s ease;
-      background-color: #FAFAFA;
+      background-color: rgba(15, 23, 42, 0.6);
+      color: #F8FAFC;
+    }
+
+    .form-control::placeholder {
+      color: #64748B;
     }
 
     .form-control:focus {
-      border-color: var(--primary);
-      background-color: #FFFFFF;
-      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+      border-color: #38BDF8;
+      background-color: rgba(15, 23, 42, 0.85);
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
+      color: #FFFFFF;
     }
 
     .input-group-text {
-      background: #F1F5F9;
-      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-right: none;
-      color: var(--secondary);
+      color: #94A3B8;
       border-radius: 0.625rem 0 0 0.625rem;
-      padding-left: 0.9rem;
-      padding-right: 0.9rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
 
     .input-group .form-control {
@@ -125,17 +130,17 @@
     }
 
     .input-group .btn-password-toggle {
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-left: none;
-      background: #F1F5F9;
-      color: var(--secondary);
+      background: rgba(15, 23, 42, 0.6);
+      color: #94A3B8;
       border-radius: 0 0.625rem 0.625rem 0;
       transition: all 0.2s ease;
     }
 
     .input-group .btn-password-toggle:hover {
-      color: var(--dark);
-      background: #E2E8F0;
+      color: #F8FAFC;
+      background: rgba(51, 65, 85, 0.8);
     }
 
     .btn-primary-custom {
@@ -143,18 +148,18 @@
       border: none;
       color: white;
       font-weight: 600;
-      padding: 0.8rem 1.25rem;
+      padding: 0.85rem 1.25rem;
       border-radius: 0.625rem;
       width: 100%;
-      letter-spacing: 0.01em;
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+      letter-spacing: 0.02em;
+      box-shadow: 0 6px 20px -2px rgba(14, 165, 233, 0.4);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .btn-primary-custom:hover {
-      background: linear-gradient(135deg, #0284C7, #0369A1);
+      background: linear-gradient(135deg, #38BDF8, #0EA5E9);
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
+      box-shadow: 0 10px 25px -2px rgba(14, 165, 233, 0.55);
       color: white;
     }
 
@@ -162,17 +167,16 @@
       border-radius: 0.625rem;
       font-size: 0.875rem;
       border: none;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
 
     .reset-notice-box {
-      background-color: #F0F9FF;
-      border: 1px solid #BAE6FD;
+      background-color: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
       border-radius: 0.625rem;
       padding: 0.9rem;
       margin-bottom: 1.25rem;
       font-size: 0.875rem;
-      color: #0369A1;
+      color: #7DD3FC;
     }
   </style>
 </head>
@@ -184,8 +188,8 @@
     <div class="brand-icon">
       <i class="fa-solid fa-fill-drip"></i>
     </div>
-    <h4 class="fw-bold mb-1" style="color: var(--dark);">Paint IMS V2</h4>
-    <p class="text-secondary small mb-0">Multi-tenant Paint Shop Inventory Management</p>
+    <h4 class="fw-bold mb-1 text-white">Paint IMS V2</h4>
+    <p class="text-muted small mb-0">Multi-tenant Paint Shop Inventory Management</p>
   </div>
 
   <!-- Alert Messages -->
@@ -207,7 +211,7 @@
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
       <div class="mb-3">
-        <label for="email" class="form-label small fw-semibold text-secondary">Email Address</label>
+        <label for="email" class="form-label small fw-semibold text-muted">Email Address</label>
         <div class="input-group">
           <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
           <input type="email" class="form-control" id="email" name="email" placeholder="name@paintshop.com" required autofocus>
@@ -216,8 +220,8 @@
 
       <div class="mb-3">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <label for="password" class="form-label small fw-semibold text-secondary mb-0">Password</label>
-          <a href="/forgot-password" class="small text-decoration-none" style="color: var(--primary);">Forgot password?</a>
+          <label for="password" class="form-label small fw-semibold text-muted mb-0">Password</label>
+          <a href="/forgot-password" class="small text-decoration-none" style="color: #38BDF8;">Forgot password?</a>
         </div>
         <div class="input-group">
           <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
