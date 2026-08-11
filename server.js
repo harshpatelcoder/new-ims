@@ -9,7 +9,7 @@ const helmet = require('helmet');
 const crypto = require('crypto');
 const path = require('path');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 let mongoUri = process.env.MONGODB_URI;
 
 // Initialize MongoDB connection
@@ -36,7 +36,12 @@ async function connectDB() {
   }
 
   try {
-    await mongoose.connect(mongoUri);
+ await mongoose.connect(mongoUri, {
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  serverSelectionTimeoutMS: 10000,
+  socketTimeoutMS: 45000
+});
     console.log('Connected successfully to MongoDB database.');
     await initSuperAdmin();
   } catch (err) {
