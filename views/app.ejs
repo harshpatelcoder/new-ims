@@ -2133,34 +2133,53 @@
 
 <% if (page === 'dashboard' && typeof dashboardData !== 'undefined' && dashboardData.categoryBreakdown) { %>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('categoryChart');
-    if (ctx) {
-      const labels = [<%= dashboardData.categoryBreakdown.map(c => `'${c._id || "General"}'`).join(',') %>];
-      const data = [<%= dashboardData.categoryBreakdown.map(c => c.count).join(',') %>];
+  (function() {
+    function initChart() {
+      const ctx = document.getElementById('categoryChart');
+      if (!ctx) return;
+      if (typeof Chart === 'undefined') {
+        setTimeout(initChart, 100);
+        return;
+      }
+
+      const rawBreakdown = <%- JSON.stringify(dashboardData.categoryBreakdown || []) %>;
+      let labels = rawBreakdown.map(c => c._id ? String(c._id) : "General Paint");
+      let data = rawBreakdown.map(c => Number(c.count) || 0);
+
+      const hasData = labels.length > 0 && data.some(val => val > 0);
+
+      if (!hasData) {
+        labels = ['No Products Added Yet'];
+        data = [1];
+      }
+
+      const palette = ['#0EA5E9', '#10B981', '#F59E0B', '#6366F1', '#EC4899', '#8B5CF6', '#0284C7', '#64748B'];
+      const backgroundColors = hasData 
+        ? palette.slice(0, labels.length)
+        : ['#E2E8F0'];
 
       new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: labels.length > 0 ? labels : ['General'],
+          labels: labels,
           datasets: [{
-            data: data.length > 0 ? data : [1],
-            backgroundColor: ['#0EA5E9', '#10B981', '#F59E0B', '#6366F1', '#EC4899', '#64748B', '#0284C7'],
+            data: data,
+            backgroundColor: backgroundColors,
             borderWidth: 2,
             borderColor: '#FFFFFF',
-            hoverOffset: 6
+            hoverOffset: hasData ? 6 : 0
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          cutout: '72%',
+          cutout: '70%',
           plugins: {
             legend: { 
               position: 'bottom',
               labels: {
                 usePointStyle: true,
-                padding: 18,
+                padding: 16,
                 font: {
                   family: "'Inter', sans-serif",
                   size: 12,
@@ -2169,6 +2188,7 @@
               }
             },
             tooltip: {
+              enabled: hasData,
               padding: 10,
               cornerRadius: 8,
               backgroundColor: '#0F172A',
@@ -2179,7 +2199,13 @@
         }
       });
     }
-  });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initChart);
+    } else {
+      initChart();
+    }
+  })();
 </script>
 <% } %>
 
